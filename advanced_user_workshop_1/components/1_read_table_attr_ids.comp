@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<purity-config xmlns:comm="http://www.ataccama.com/purity/comment" version="13.3.2.final">
+	<references/>
+	<component-mappings>
+		<propertyMappings/>
+	</component-mappings>
+
+<!-- (Multiplicator) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.flow.Multiplicator" disabled="false" id="Multiplicator">
+		<properties/>
+		<visual-constraints layout="vertical" bounds="312,72,48,48"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="Multiplicator"/>
+		<target endpoint="in_right" step="join attribute info to original data set"/>
+		<visual-constraints>
+			<bendpoints>
+				<point location="552,120"/>
+			</bendpoints>
+		</visual-constraints>
+	</connection>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="Multiplicator"/>
+		<target endpoint="in" step="read tables and attributes"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (Parse origin path and attribute name) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.flow.AlterFormat" disabled="false" id="Parse origin path and attribute name">
+		<properties>
+			<addedColumns>
+				<addedColumn expression="word(table_path,0,&quot;.&quot;)+&quot;/&quot;+word(table_path,1,&quot;.&quot;)" name="originPath" type="STRING">
+					<comm:comment>transactional_customer_data.customers.creditlimit</comm:comment>
+				</addedColumn>
+				<addedColumn expression="word(table_path,2,&quot;.&quot;)" name="attribute_name" type="STRING">
+					<comm:comment>transactional_customer_data.customers.creditlimit</comm:comment>
+				</addedColumn>
+			</addedColumns>
+			<removedColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="312,-48,-1,-1"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="Parse origin path and attribute name"/>
+		<target endpoint="in" step="Multiplicator"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (join attribute info to original data set) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.merge.Join" disabled="false" id="join attribute info to original data set">
+		<properties matchStrategy="MERGE" leftKey="originPath+attribute_name" rightKey="originPath+attribute_name" joinType="RIGHT">
+			<columnDefinitions>
+				<columnDefinition expression="in_left.attribute_id" name="attribute_id"/>
+				<columnDefinition expression="in_left.originPath" name="originPath"/>
+				<columnDefinition expression="in_right.Source" name="Source"/>
+				<columnDefinition expression="in_right.table_path" name="table_path"/>
+				<columnDefinition expression="in_right.Rule_to_run" name="Rule_to_run"/>
+				<columnDefinition expression="in_right.attribute_name" name="attribute_name"/>
+			</columnDefinitions>
+		</properties>
+		<visual-constraints layout="vertical" bounds="504,384,-1,-1"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="join attribute info to original data set"/>
+		<target endpoint="in" step="tables_with_attr_ids.csv"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (join table info to attributes) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.merge.Join" disabled="false" id="join table info to attributes">
+		<properties matchStrategy="MERGE" leftKey="table_id" rightKey="table_id" joinType="LEFT">
+			<columnDefinitions>
+				<columnDefinition expression="in_left.attribute_name" name="attribute_name"/>
+				<columnDefinition expression="in_left.attribute_id" name="attribute_id"/>
+				<columnDefinition expression="in_left.table_id" name="table_id"/>
+				<columnDefinition expression="in_right.originPath" name="originPath"/>
+			</columnDefinitions>
+		</properties>
+		<visual-constraints layout="vertical" bounds="312,288,48,48"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="join table info to attributes"/>
+		<target endpoint="in_left" step="join attribute info to original data set"/>
+		<visual-constraints>
+			<bendpoints>
+				<point location="335,384"/>
+			</bendpoints>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (read tables and attributes) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.mmm.reader.MMMReader" disabled="false" id="read tables and attributes">
+		<properties templateEndMark="#" workflowState="published" entityType="tableCatalogItem" parentIdColumnName="" serverName="workshopOne" templateBeginMark="#" entityColumnName="" inputTemplate="originPath=&quot;#originPath#&quot; and connection.name=&quot;#Source#&quot;" idColumnName="table_id">
+			<childEntities/>
+			<columns>
+				<mMMColumnDef src="tableCatalogItem.name" name="name" type="STRING"/>
+				<mMMColumnDef src="tableCatalogItem.connection" name="connection" type="REFERENCE"/>
+				<mMMColumnDef src="tableCatalogItem.originPath" name="originPath" type="STRING"/>
+			</columns>
+			<dataFormatParameters falseValue="false" dateTimeFormat="yyyy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yyyy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+			<embeddedEntityStreams>
+				<mMMReaderRootStreamConfig name="attributes" parentIdColumnName="table_id" attribute="attributes" entityColumnName="" idColumnName="attribute_id">
+					<childEntities/>
+					<childStreams/>
+					<columns>
+						<mMMEmbeddedEntityColumnDef src="attribute.name" name="attribute_name" type="STRING"/>
+					</columns>
+					<shadowColumns/>
+				</mMMReaderRootStreamConfig>
+			</embeddedEntityStreams>
+			<shadowColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="312,168,-1,-1"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="attributes" step="read tables and attributes"/>
+		<target endpoint="in_left" step="join table info to attributes"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="read tables and attributes"/>
+		<target endpoint="in_right" step="join table info to attributes"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (rules_on_tables_test) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.msoffice.excel.read.ExcelFileReader" disabled="false" id="rules_on_tables_test">
+		<properties fileName="../data/in/rules_on_tables_test.xlsx" sheetName="Sheet1" startCell="A2" skipEmptyRows="false" useModelApi="false">
+			<columns>
+				<columnDef name="Source" type="STRING"/>
+				<columnDef name="table_path" type="STRING"/>
+				<columnDef name="Rule_to_run" type="STRING"/>
+			</columns>
+			<shadowColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="312,-120,-1,-1"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="rules_on_tables_test"/>
+		<target endpoint="in" step="Parse origin path and attribute name"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (tables_with_attr_ids.csv) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.text.write.TextFileWriter" disabled="false" id="tables_with_attr_ids.csv">
+		<properties writeHeader="true" fileName="../data/out/tables_with_attr_ids.csv" fieldSeparator=";" generateMetadata="true" stringQualifierEscape="&quot;" writeAllColumns="true" compression="NONE" encoding="UTF-8" lineSeparator="\r\n" stringQualifier="&quot;" useStringQualifierOnAllColumns="false">
+			<columns/>
+			<dataFormatParameters falseValue="false" dateTimeFormat="yyyy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yyyy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="504,456,-1,-1"/>
+	</step>
+
+
+
+<modelComment backgroundColor="255,255,180" borderColor="183,183,0" bounds="24,144,217,169" foregroundColor="51,51,51">We are filtering on 
+connection name
+and on the base path
+which is path to table in db</modelComment>
+
+
+
+<modelComment backgroundColor="255,255,180" borderColor="183,183,0" bounds="600,-96,433,409" foregroundColor="51,51,51">This component reads table for each row from the excel
+for each table it reads list of columns
+and then joins this information back to the data from excel
+
+
+the goal is for every row to add column and table ID from 
+the catalog, so we can later use it to assign terms to these
+columns</modelComment>
+
+</purity-config>

@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<purity-config version="13.3.2.final">
+	<references/>
+	<component-mappings>
+		<propertyMappings/>
+	</component-mappings>
+
+<!-- (create term_ids lookup) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.builders.LookupBuilder" disabled="false" id="create term_ids lookup">
+		<properties bestDistanceIndex="false" fileName="../data/ext/lkp/term_ids.lkp" bidirectApproximativeIndex="false" duplicities="FIRST" approximativeIndex="false" compressed="false" key="name">
+			<additionalColumns>
+				<columnExprDef name="term_id"/>
+			</additionalColumns>
+			<matchingValue doRemoveDia="false" doUpperCase="false" doSqueezeWS="false" doRemoveRepeatedChars="false"/>
+			<userMetadata>
+				<items/>
+			</userMetadata>
+		</properties>
+		<visual-constraints layout="vertical" bounds="336,240,-1,-1"/>
+	</step>
+
+
+
+<!-- (read terms and ids) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.mmm.reader.MMMReader" disabled="false" id="read terms and ids">
+		<properties templateEndMark="#" workflowState="published" entityType="term" parentIdColumnName="" serverName="workshopOne" templateBeginMark="#" entityColumnName="" inputTemplate="name=&quot;#Rule_to_run#&quot;" idColumnName="term_id">
+			<childEntities/>
+			<columns>
+				<mMMColumnDef src="term.name" name="name" type="STRING"/>
+			</columns>
+			<dataFormatParameters falseValue="false" dateTimeFormat="yyyy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yyyy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+			<embeddedEntityStreams/>
+			<shadowColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="336,144,-1,-1"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="read terms and ids"/>
+		<target endpoint="in" step="create term_ids lookup"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (rules_on_tables_test) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.msoffice.excel.read.ExcelFileReader" disabled="false" id="rules_on_tables_test">
+		<properties fileName="../data/in/rules_on_tables_test.xlsx" sheetName="Sheet1" startCell="A2" skipEmptyRows="false" useModelApi="false">
+			<columns>
+				<columnDef name="Source" type="STRING"/>
+				<columnDef name="table_path" type="STRING"/>
+				<columnDef name="Rule_to_run" type="STRING"/>
+			</columns>
+			<shadowColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="336,48,32,32"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="rules_on_tables_test"/>
+		<target endpoint="in" step="read terms and ids"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<modelComment backgroundColor="255,255,180" borderColor="183,183,0" bounds="48,48,241,241" foregroundColor="51,51,51">Terms and their rule mapping
+are fairly static
+
+that is why we are creating the lookups
+in the file here and using it multiple 
+times when running</modelComment>
+
+</purity-config>

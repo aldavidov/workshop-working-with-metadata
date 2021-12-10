@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<settings>
+  <multiSheet>
+    <saved-state defaultSheetName="Sheet1" class="com.ataccama.dqc.gui.msoffice.internal.ExcelMetaData$Data">
+      <sheets>
+        <excelSheetMetaData firstColumn="0" firstRow="1" name="Sheet1" empty="false">
+          <columns>
+            <iConnectorColumnMetaData dataType="STRING" name="Source" class="com.ataccama.dqc.gui.msoffice.internal.SheetColumnMetaData"/>
+            <iConnectorColumnMetaData dataType="STRING" name="table_path" class="com.ataccama.dqc.gui.msoffice.internal.SheetColumnMetaData"/>
+            <iConnectorColumnMetaData dataType="STRING" name="Rule_to_run" class="com.ataccama.dqc.gui.msoffice.internal.SheetColumnMetaData"/>
+          </columns>
+        </excelSheetMetaData>
+      </sheets>
+    </saved-state>
+  </multiSheet>
+</settings>

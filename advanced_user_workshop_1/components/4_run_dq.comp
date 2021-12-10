@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<purity-config version="13.3.2.final">
+	<references/>
+	<component-mappings>
+		<propertyMappings/>
+	</component-mappings>
+
+<!-- (Run DQ via Graphql) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.json.call.JsonCall" disabled="false" id="Run DQ via Graphql">
+		<properties templateEndMark="#" urlResource="workshopUrl" method="POST" timeoutMs="10000" urlBeginMark="%" urlEndMark="%" parseErrorResponse="false" templateBeginMark="#" encoding="UTF-8" inputTemplate="{&quot;query&quot;:&quot;mutation catalogItemAttributeDQ {\r\n    attributeEvaluateDq(gid: \&quot;#attribute_id#\&quot;) {\r\n        gid\r\n    }\r\n}&quot;,&quot;variables&quot;:{}}" delayBetweenRequestsMs="0">
+			<dataFormatParameters falseValue="false" dateTimeFormat="yyyy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yyyy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+			<reader>
+				<dataFormatParameters falseValue="false" dateTimeFormat="yy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yy-MM-dd" trueValue="true" dateFormatLocale="en_US" class="com.ataccama.dqc.tasks.io.text.read.TextReaderDataFormatParameters" thousandsSeparator=""/>
+				<dataStreams>
+					<rootJsonStreamConfig path="$" name="nonput" minOneRecord="true" maxOneRecord="false">
+						<attributes>
+							<attribute path="nothing" name="nothing" type="STRING"/>
+						</attributes>
+						<dataStreams/>
+						<scorer>
+							<scoringEntries>
+								<scoringEntry explain="true" score="0" explainAs="WLA_NOT_FOUND" key="WLA_NOT_FOUND"/>
+								<scoringEntry explain="true" score="0" explainAs="WLA_MULTIPLE" key="WLA_MULTIPLE"/>
+							</scoringEntries>
+						</scorer>
+						<shadowColumns/>
+					</rootJsonStreamConfig>
+				</dataStreams>
+			</reader>
+			<scorer>
+				<scoringEntries>
+					<scoringEntry explain="true" score="0" explainAs="WLA_TARGET_UNREACHABLE" key="WLA_TARGET_UNREACHABLE"/>
+					<scoringEntry explain="true" score="0" explainAs="WLA_TIMEOUT" key="WLA_TIMEOUT"/>
+					<scoringEntry explain="true" score="0" explainAs="WLA_RESPONSE_CODE" key="WLA_RESPONSE_CODE"/>
+					<scoringEntry explain="true" score="0" explainAs="WLA_INVALID_JSON" key="WLA_INVALID_JSON"/>
+				</scoringEntries>
+			</scorer>
+		</properties>
+		<visual-constraints layout="vertical" bounds="360,168,32,32"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="nonput" step="Run DQ via Graphql"/>
+		<target endpoint="in" step="Trash"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="Run DQ via Graphql"/>
+		<target endpoint="in" step="Trash 2"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (Trash) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.Trash" disabled="false" id="Trash">
+		<properties/>
+		<visual-constraints layout="vertical" bounds="288,312,48,48"/>
+	</step>
+
+
+
+<!-- (Trash 2) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.Trash" disabled="false" id="Trash 2">
+		<properties/>
+		<visual-constraints layout="vertical" bounds="456,312,-1,-1"/>
+	</step>
+
+
+
+<!-- (attributes_with_assigned_terms) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.text.read.TextFileReader" disabled="false" id="attributes_with_assigned_terms">
+		<properties lineMaxReadLength="65536" fileName="../data/out/attributes_with_assigned_terms.csv" fieldSeparator=";" stringQualifierEscape="&quot;" numberOfLinesInFooter="0" compression="NONE" encoding="UTF-8" lineSeparator="\r\n" stringQualifier="&quot;" numberOfLinesInHeader="1">
+			<columns>
+				<textReaderColumn name="attribute_id" ignore="false" type="STRING"/>
+				<textReaderColumn name="originPath" ignore="false" type="STRING"/>
+				<textReaderColumn name="Source" ignore="false" type="STRING"/>
+				<textReaderColumn name="table_path" ignore="false" type="STRING"/>
+				<textReaderColumn name="Rule_to_run" ignore="false" type="STRING"/>
+				<textReaderColumn name="attribute_name" ignore="false" type="STRING"/>
+				<textReaderColumn name="term_id" ignore="false" type="STRING"/>
+			</columns>
+			<dataFormatParameters falseValue="false" dateTimeFormat="yy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+			<errorHandlingStrategy rejectFileName="rejected.txt">
+				<errorInstructions>
+					<errorInstruction dataStrategy="READ_POSSIBLE" errorType="EXTRA_DATA" putToLog="true" putToReject="false"/>
+					<errorInstruction dataStrategy="STOP" errorType="LONG_LINE" putToLog="true" putToReject="true"/>
+					<errorInstruction dataStrategy="STOP" errorType="PROCESSING_ERROR" putToLog="true" putToReject="false"/>
+					<errorInstruction dataStrategy="READ_POSSIBLE" errorType="INVALID_DATE" putToLog="true" putToReject="false"/>
+					<errorInstruction dataStrategy="READ_POSSIBLE" errorType="SHORT_LINE" putToLog="true" putToReject="true"/>
+					<errorInstruction dataStrategy="NULL_VALUE" errorType="UNPARSABLE_FIELD" putToLog="true" putToReject="false"/>
+				</errorInstructions>
+			</errorHandlingStrategy>
+			<shadowColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="360,72,32,32"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="attributes_with_assigned_terms"/>
+		<target endpoint="in" step="Run DQ via Graphql"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<modelComment backgroundColor="255,255,180" borderColor="183,183,0" bounds="672,72,313,289" foregroundColor="51,51,51">We are running dq by calling GraphQL endpoint
+
+Original message (before transformation to curl)
+
+mutation catalogItemAttributeDQ {
+    attributeEvaluateDq(gid: &quot;&lt;id of attribute&gt;&quot;) {
+        gid
+    }
+}
+
+the call does not return data, so we added parsing
+and send empty output to trash</modelComment>
+
+</purity-config>

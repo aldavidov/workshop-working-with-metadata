@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns:vis="http://www.ataccama.com/purity/visual" version="13.3.2.final">
+	<continueOnFailure>false</continueOnFailure>
+	<groups/>
+	<multiplicity>0</multiplicity>
+	<variables>
+		<derived/>
+		<input/>
+	</variables>
+	<tasks>
+		<task mode="NORMAL" acceptMode="ALL_VALID" disabled="false" id="1_read_table_attr_ids.comp" priority="0">
+			<executable parallelismLevel="1" class="com.ataccama.adt.task.exec.EwfDqcTask" planFile="../components/1_read_table_attr_ids.comp"/>
+			<vis:visualConstraints bounds="243,220,54,54"/>
+		</task>
+		<task mode="NORMAL" acceptMode="ALL_VALID" disabled="false" id="2_add_id_of_term.comp" priority="0">
+			<executable parallelismLevel="1" class="com.ataccama.adt.task.exec.EwfDqcTask" planFile="../components/2_add_id_of_term.comp"/>
+			<vis:visualConstraints bounds="418,224,-1,-1"/>
+		</task>
+		<task mode="NORMAL" acceptMode="ALL_VALID" disabled="false" id="3_assign_terms.comp" priority="0">
+			<executable parallelismLevel="1" class="com.ataccama.adt.task.exec.EwfDqcTask" planFile="../components/3_assign_terms.comp"/>
+			<vis:visualConstraints bounds="580,223,-1,-1"/>
+		</task>
+		<task mode="NORMAL" acceptMode="ALL_VALID" disabled="false" id="4_run_dq.comp" priority="0">
+			<executable parallelismLevel="1" class="com.ataccama.adt.task.exec.EwfDqcTask" planFile="../components/4_run_dq.comp"/>
+			<vis:visualConstraints bounds="730,220,-1,-1"/>
+		</task>
+		<task mode="NORMAL" acceptMode="ALL_VALID" disabled="false" id="Sleep" priority="0">
+			<executable sleepTime="60000" class="com.ataccama.adt.task.exec.EwfSleepTask"/>
+			<vis:visualConstraints bounds="906,225,-1,-1"/>
+		</task>
+		<task mode="NORMAL" acceptMode="ALL_VALID" disabled="false" id="5_read_dq_results_steps.comp" priority="0">
+			<executable parallelismLevel="1" class="com.ataccama.adt.task.exec.EwfDqcTask" planFile="../components/5_read_dq_results_steps.comp"/>
+			<vis:visualConstraints bounds="1071,227,-1,-1"/>
+		</task>
+	</tasks>
+	<links>
+		<link disabled="false" from="1_read_table_attr_ids.comp" to="2_add_id_of_term.comp" type="NORMAL">
+			<vis:visualConstraints>
+				<vis:bendpoints/>
+			</vis:visualConstraints>
+		</link>
+		<link disabled="false" from="2_add_id_of_term.comp" to="3_assign_terms.comp" type="NORMAL">
+			<vis:visualConstraints>
+				<vis:bendpoints/>
+			</vis:visualConstraints>
+		</link>
+		<link disabled="false" from="3_assign_terms.comp" to="4_run_dq.comp" type="NORMAL">
+			<vis:visualConstraints>
+				<vis:bendpoints/>
+			</vis:visualConstraints>
+		</link>
+		<link disabled="false" from="4_run_dq.comp" to="Sleep" type="NORMAL">
+			<vis:visualConstraints>
+				<vis:bendpoints/>
+			</vis:visualConstraints>
+		</link>
+		<link disabled="false" from="Sleep" to="5_read_dq_results_steps.comp" type="NORMAL">
+			<vis:visualConstraints>
+				<vis:bendpoints/>
+			</vis:visualConstraints>
+		</link>
+	</links>
+	<vis:modelComments>
+		<vis:modelComment backgroundColor="255,255,180" borderColor="183,183,0" bounds="87,15,301,155" foregroundColor="51,51,51">Running all teh actions in order</vis:modelComment>
+		<vis:modelComment backgroundColor="255,0,0" borderColor="183,183,0" bounds="757,332,338,234" foregroundColor="51,51,51">We are waiting here (arbitrary time)
+for dq processing to finish
+
+this is not a good pattern, but acceptable for testing
+
+in real world, we want to poll the job queue until empty
+then download results
+
+or better yet, use event system to download dq results 
+as soon as available</vis:modelComment>
+	</vis:modelComments>
+</workflow>

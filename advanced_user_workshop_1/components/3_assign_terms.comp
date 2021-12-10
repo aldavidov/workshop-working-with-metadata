@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<purity-config version="13.3.2.final">
+	<references/>
+	<component-mappings>
+		<propertyMappings/>
+	</component-mappings>
+
+<!-- (Assign term to column) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.mmm.writer.MMMWriter" disabled="false" id="Assign term to column">
+		<properties parentProperty="termInstances" workflowStateColumnName="workflowState" workflowState="published" entityType="termInstance" logFile="metadata_import_logs/ONE_Metadata_Writer.csv" parentIdColumnName="attribute_id" serverName="workshopOne" entityColumnName="" createdGidColumnName="" idColumnName="" parentType="attribute">
+			<childEntities/>
+			<columns>
+				<mMMColumnExprDef expression="term_id" name="target"/>
+			</columns>
+		</properties>
+		<visual-constraints layout="vertical" bounds="336,168,32,32"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="Assign term to column"/>
+		<target endpoint="in" step="attributes_with_assigned_terms.csv"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<!-- (attributes_with_assigned_terms.csv) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.text.write.TextFileWriter" disabled="false" id="attributes_with_assigned_terms.csv">
+		<properties writeHeader="true" fileName="../data/out/attributes_with_assigned_terms.csv" fieldSeparator=";" generateMetadata="true" stringQualifierEscape="&quot;" writeAllColumns="true" compression="NONE" encoding="UTF-8" lineSeparator="\r\n" stringQualifier="&quot;" useStringQualifierOnAllColumns="false">
+			<columns/>
+			<dataFormatParameters falseValue="false" dateTimeFormat="yyyy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yyyy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="336,264,32,32"/>
+	</step>
+
+
+
+<!-- (tables_with_attr_term_ids) --><step mode="NORMAL" className="com.ataccama.dqc.tasks.io.text.read.TextFileReader" disabled="false" id="tables_with_attr_term_ids">
+		<properties lineMaxReadLength="65536" fileName="../data/out/tables_with_attr_term_ids.csv" fieldSeparator=";" stringQualifierEscape="&quot;" numberOfLinesInFooter="0" compression="NONE" encoding="UTF-8" lineSeparator="\r\n" stringQualifier="&quot;" numberOfLinesInHeader="1">
+			<columns>
+				<textReaderColumn name="attribute_id" ignore="false" type="STRING"/>
+				<textReaderColumn name="originPath" ignore="false" type="STRING"/>
+				<textReaderColumn name="Source" ignore="false" type="STRING"/>
+				<textReaderColumn name="table_path" ignore="false" type="STRING"/>
+				<textReaderColumn name="Rule_to_run" ignore="false" type="STRING"/>
+				<textReaderColumn name="attribute_name" ignore="false" type="STRING"/>
+				<textReaderColumn name="term_id" ignore="false" type="STRING"/>
+			</columns>
+			<dataFormatParameters falseValue="false" dateTimeFormat="yy-MM-dd HH:mm:ss" decimalSeparator="." dayFormat="yy-MM-dd" trueValue="true" dateFormatLocale="en_US" thousandsSeparator=""/>
+			<errorHandlingStrategy rejectFileName="rejected.txt">
+				<errorInstructions>
+					<errorInstruction dataStrategy="READ_POSSIBLE" errorType="EXTRA_DATA" putToLog="true" putToReject="false"/>
+					<errorInstruction dataStrategy="STOP" errorType="LONG_LINE" putToLog="true" putToReject="true"/>
+					<errorInstruction dataStrategy="STOP" errorType="PROCESSING_ERROR" putToLog="true" putToReject="false"/>
+					<errorInstruction dataStrategy="READ_POSSIBLE" errorType="INVALID_DATE" putToLog="true" putToReject="false"/>
+					<errorInstruction dataStrategy="READ_POSSIBLE" errorType="SHORT_LINE" putToLog="true" putToReject="true"/>
+					<errorInstruction dataStrategy="NULL_VALUE" errorType="UNPARSABLE_FIELD" putToLog="true" putToReject="false"/>
+				</errorInstructions>
+			</errorHandlingStrategy>
+			<shadowColumns/>
+		</properties>
+		<visual-constraints layout="vertical" bounds="336,72,32,32"/>
+	</step>
+	<connection className="com.ataccama.dqc.model.elements.connections.StandardFlowConnection" disabled="false">
+		<source endpoint="out" step="tables_with_attr_term_ids"/>
+		<target endpoint="in" step="Assign term to column"/>
+		<visual-constraints>
+			<bendpoints/>
+		</visual-constraints>
+	</connection>
+
+
+
+<modelComment backgroundColor="255,255,180" borderColor="183,183,0" bounds="648,48,409,289" foregroundColor="51,51,51">We have list of column ids and term ids
+
+Each row represents a column and term to be 
+assigned to that column
+
+we are doing this by adding &quot;termInstance&quot; 
+on column referencing the term</modelComment>
+
+</purity-config>
